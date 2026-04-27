@@ -469,6 +469,10 @@ export default function App() {
     return () => observer.disconnect();
   }, []);
 
+  const scale = availableSize.width > 0 
+    ? Math.min(0.9, (availableSize.width - 40) / 540, (availableSize.height - 40) / 600)
+    : 0.1; // Start nearly invisible to avoid flash before measurement
+
   return (
     <div className="fixed inset-0 bg-bg text-white font-sans flex flex-col items-center justify-center overflow-hidden touch-none select-none">
       <div className="flex flex-col lg:flex-row w-full h-full max-w-7xl lg:max-h-[900px] bg-bg lg:bg-neutral-800 lg:rounded-xl lg:shadow-2xl overflow-hidden relative">
@@ -534,7 +538,7 @@ export default function App() {
                     height: '600px',
                     // scale(min(MAX_SCALE, HORIZONTAL_FIT, VERTICAL_FIT))
                     // Use measured availableSize instead of window-based vw/vh for 100% accurate responsive fit
-                    transform: availableSize.width > 0 ? `scale(min(0.9, (availableSize.width - 20) / 540, (availableSize.height - 20) / 600))` : 'scale(0.5)',
+                    transform: `scale(${scale})`,
                     transformOrigin: 'center center'
                   }}
                 >
