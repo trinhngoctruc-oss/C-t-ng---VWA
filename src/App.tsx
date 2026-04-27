@@ -450,6 +450,25 @@ export default function App() {
     );
   }
 
+  const [availableSize, setAvailableSize] = useState({ width: 0, height: 0 });
+  const mainRef = React.useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!mainRef.current) return;
+    
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setAvailableSize({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height
+        });
+      }
+    });
+
+    observer.observe(mainRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-bg text-white font-sans flex flex-col items-center justify-center overflow-hidden touch-none select-none">
       <div className="flex flex-col lg:flex-row w-full h-full max-w-7xl lg:max-h-[900px] bg-bg lg:bg-neutral-800 lg:rounded-xl lg:shadow-2xl overflow-hidden relative">
@@ -493,7 +512,10 @@ export default function App() {
         </aside>
 
         {/* Main Game Area */}
-        <main className="flex-grow bg-[#1a1a1a] flex items-center justify-center relative order-2 lg:order-2 overflow-hidden touch-none pointer-events-auto min-h-0 w-full p-4 lg:p-8">
+        <main 
+          ref={mainRef}
+          className="flex-grow bg-[#1a1a1a] flex items-center justify-center relative order-2 lg:order-2 overflow-hidden touch-none pointer-events-auto min-h-0 w-full p-2 lg:p-8"
+        >
           {/* Background Board Grid Decorative */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
           
@@ -508,12 +530,11 @@ export default function App() {
                 <div 
                   className="relative origin-center"
                   style={{ 
-                    // Set a fixed 540px base width for Chinese Chess (9x60)
                     width: '540px',
                     height: '600px',
                     // scale(min(MAX_SCALE, HORIZONTAL_FIT, VERTICAL_FIT))
-                    // Using 100px margin to be absolutely safe for iPhone edges and status bars
-                    transform: `scale(min(0.85, (100vw - 100px) / 540, (100vh - 220px) / 600))`,
+                    // Use measured availableSize instead of window-based vw/vh for 100% accurate responsive fit
+                    transform: availableSize.width > 0 ? `scale(min(0.9, (availableSize.width - 20) / 540, (availableSize.height - 20) / 600))` : 'scale(0.5)',
                     transformOrigin: 'center center'
                   }}
                 >
