@@ -450,28 +450,45 @@ export default function App() {
     );
   }
 
-  const [availableSize, setAvailableSize] = useState({ width: 0, height: 0 });
+  const [availableSize, setAvailableSize] = useState({ 
+    width: typeof window !== 'undefined' ? window.innerWidth : 0, 
+    height: typeof window !== 'undefined' ? window.innerHeight : 0 
+  });
   const mainRef = React.useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (!mainRef.current) return;
-    
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
+    const updateSize = () => {
+      if (mainRef.current) {
         setAvailableSize({
-          width: entry.contentRect.width,
-          height: entry.contentRect.height
+          width: mainRef.current.clientWidth,
+          height: mainRef.current.clientHeight
+        });
+      } else {
+        setAvailableSize({
+          width: window.innerWidth,
+          height: window.innerHeight
         });
       }
-    });
+    };
 
-    observer.observe(mainRef.current);
-    return () => observer.disconnect();
+    updateSize();
+    window.addEventListener('resize', updateSize);
+    
+    let observer: ResizeObserver | null = null;
+    if (mainRef.current) {
+      observer = new ResizeObserver(updateSize);
+      observer.observe(mainRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateSize);
+      if (observer) observer.disconnect();
+    };
   }, []);
 
   const scale = availableSize.width > 0 
-    ? Math.min(0.9, (availableSize.width - 40) / 540, (availableSize.height - 40) / 600)
-    : 0.1; // Start nearly invisible to avoid flash before measurement
+    ? Math.min(0.9, (availableSize.width - 20) / 540, (availableSize.height - 40) / 600)
+    : 0.8;
 
   return (
     <div className="fixed inset-0 bg-bg text-white font-sans flex flex-col items-center justify-center overflow-hidden touch-none select-none">
