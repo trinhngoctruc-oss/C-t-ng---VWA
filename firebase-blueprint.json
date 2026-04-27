@@ -1,0 +1,42 @@
+{
+  "entities": {
+    "Room": {
+      "title": "Game Room",
+      "description": "A multiplayer game room for Xiangqi",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "hostId": { "type": "string" },
+        "redPlayerId": { "type": "string", "description": "UID or display name of the red player" },
+        "blackPlayerId": { "type": "string", "description": "UID or display name of the black player" },
+        "redPlayerName": { "type": "string" },
+        "blackPlayerName": { "type": "string" },
+        "turn": { "type": "string", "enum": ["RED", "BLACK"] },
+        "status": { "type": "string", "enum": ["waiting", "playing", "finished"] },
+        "winner": { "type": "string" },
+        "pieces": { 
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string" },
+              "side": { "type": "string" },
+              "x": { "type": "number" },
+              "y": { "type": "number" }
+            }
+          }
+        },
+        "lastMove": { "type": "object" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "status", "turn", "pieces"]
+    }
+  },
+  "firestore": {
+    "/rooms/{roomId}": {
+      "schema": "Room",
+      "description": "Collection of active game rooms"
+    }
+  }
+}
